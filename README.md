@@ -1,8 +1,6 @@
 Oracle 11g - 692.6 MB
 ============================
-Oracle Express Edition 11g Release 2 on Debian Wheezy
-
-This **Dockerfile** is a [trusted build](https://registry.hub.docker.com/u/sath89/oracle-xe-11g/) of [Docker Registry](https://registry.hub.docker.com/).
+## Oracle Express Edition 11g Release 2 on Debian Wheezy
 
 ### Installation
 
