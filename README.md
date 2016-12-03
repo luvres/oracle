@@ -6,16 +6,23 @@ Oracle 11g - 692.6 MB
 
     docker pull izone/oracle:11g
 
-Run with 8080 and 1521 ports opened:
+### Run with 8080 and 1521 ports opened:
 
-    docker run -d -p 8080:8080 -p 1521:1521 izone/oracle:11g
+docker run --rm -h oraclexe --name OracleXE \
+	-p 8080:8080 \
+	-p 1521:1521 \
+	izone/oracle:11g
 
-Run with data on host and reuse it:
+### Run with data on host and reuse it:
 
-    docker run -d -p 8080:8080 -p 1521:1521 -v /my/oracle/data:/u01/app/oracle izone/oracle:11g
+docker run --rm -h oraclexe --name OracleXE \
+	-p 8080:8080 \
+	-p 1521:1521 \
+	-v /my/oracle/data:/u01/app/oracle \
+	izone/oracle:11g
 
-Run with customization of processes, sessions, transactions
-This customization is needed on the database initialization stage. If you are using mounted folder with DB files this is not used:
+### Run with customization of processes, sessions, transactions
+#### This customization is needed on the database initialization stage. If you are using mounted folder with DB files this is not used:
 
     ##Consider this formula before customizing:
     #processes=x
@@ -25,9 +32,9 @@ This customization is needed on the database initialization stage. If you are us
     -e processes=1000 \
     -e sessions=1105 \
     -e transactions=1215 \
-    sath89/oracle-xe-11g
+    izone/oracle:11g
 
-Connect database with following setting:
+### Connect database with following setting:
 
     hostname: localhost
     port: 1521
@@ -35,21 +42,24 @@ Connect database with following setting:
     username: system
     password: oracle
 
-Password for SYS & SYSTEM:
+### Password for SYS & SYSTEM:
 
     oracle
 
-Connect to Oracle Application Express web management console with following settings:
+### Connect to Oracle Application Express web management console with following settings:
 
     http://localhost:8080/apex
     workspace: INTERNAL
     user: ADMIN
     password: oracle
 
-Apex upgrade up to v 5.*
+### Apex upgrade up to v 5.*
 
-    docker run -it --rm --volumes-from ${DB_CONTAINER_NAME} --link ${DB_CONTAINER_NAME}:oracle-database -e PASS=YourSYSPASS sath89/apex install
-
+docker run --rm --name OracleXE -h oraclexe \
+	--volumes-from ${DB_CONTAINER_NAME} \
+	--link ${DB_CONTAINER_NAME}:oracle-database \
+	-e PASS=YourSYSPASS \
+	-ti sath89/apex install
 
 **CHANGELOG**
 * Fixed issue with reusable mounted data
