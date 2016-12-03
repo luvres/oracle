@@ -1,8 +1,8 @@
-docker-oracle-xe-11g
+Oracle 11g
 ============================
-[![](https://badge.imagelayers.io/sath89/oracle-xe-11g:latest.svg)](https://imagelayers.io/?images=sath89/oracle-xe-11g:latest 'Get your own badge on imagelayers.io')
+[![](https://badge.imagelayers.io/sath89/oracle-xe-11g:latest.svg)](https://imagelayers.io/?images=izone/oracle:11g 'Get your own badge on imagelayers.io')
 
-Oracle Express Edition 11g Release 2 on Ubuntu 14.04.1 LTS
+Oracle Express Edition 11g Release 2 on Debian Wheezy
 
 This **Dockerfile** is a [trusted build](https://registry.hub.docker.com/u/sath89/oracle-xe-11g/) of [Docker Registry](https://registry.hub.docker.com/).
 
