@@ -1,4 +1,4 @@
-FROM ubuntu:14.04
+FROM debian:wheezy
 
 MAINTAINER Maksym Bilenko <sath891@gmail.com>
 
