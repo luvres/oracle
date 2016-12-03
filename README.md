@@ -1,22 +1,20 @@
-Oracle 11g
+Oracle 11g - 692.6 MB
 ============================
-[![](https://badge.imagelayers.io/sath89/oracle-xe-11g:latest.svg)](https://imagelayers.io/?images=izone/oracle:11g 'Get your own badge on imagelayers.io')
-
 Oracle Express Edition 11g Release 2 on Debian Wheezy
 
 This **Dockerfile** is a [trusted build](https://registry.hub.docker.com/u/sath89/oracle-xe-11g/) of [Docker Registry](https://registry.hub.docker.com/).
 
 ### Installation
 
-    docker pull sath89/oracle-xe-11g
+    docker pull izone/oracle:11g
 
 Run with 8080 and 1521 ports opened:
 
-    docker run -d -p 8080:8080 -p 1521:1521 sath89/oracle-xe-11g
+    docker run -d -p 8080:8080 -p 1521:1521 izone/oracle:11g
 
 Run with data on host and reuse it:
 
-    docker run -d -p 8080:8080 -p 1521:1521 -v /my/oracle/data:/u01/app/oracle sath89/oracle-xe-11g
+    docker run -d -p 8080:8080 -p 1521:1521 -v /my/oracle/data:/u01/app/oracle izone/oracle:11g
 
 Run with customization of processes, sessions, transactions
 This customization is needed on the database initialization stage. If you are using mounted folder with DB files this is not used:
@@ -53,9 +51,6 @@ Connect to Oracle Application Express web management console with following sett
 Apex upgrade up to v 5.*
 
     docker run -it --rm --volumes-from ${DB_CONTAINER_NAME} --link ${DB_CONTAINER_NAME}:oracle-database -e PASS=YourSYSPASS sath89/apex install
-Details could be found here: https://github.com/MaksymBilenko/docker-oracle-apex
-
-**In case of any issues please post it [here](https://github.com/MaksymBilenko/docker-oracle-xe-11g/issues).**
 
 
 **CHANGELOG**
@@ -67,4 +62,4 @@ Details could be found here: https://github.com/MaksymBilenko/docker-oracle-apex
 * Added database media reuse support outside of container
 * Added graceful shutdown on containeer stop
 * Removed sshd
-
+* Build with Debian Wheezy
