@@ -3,64 +3,67 @@ Oracle 11g - 692.6 MB
 ## Oracle Express Edition 11g Release 2 on Debian Wheezy
 
 ### Installation
-
+```
     docker pull izone/oracle:11g
-
+```
 ### Run with 8080 and 1521 ports opened:
-
+```
 docker run --rm -h oraclexe --name OracleXE \
 	-p 8080:8080 \
 	-p 1521:1521 \
 	izone/oracle:11g
-
+```
 ### Run with data on host and reuse it:
-
+```
 docker run --rm -h oraclexe --name OracleXE \
 	-p 8080:8080 \
 	-p 1521:1521 \
 	-v /my/oracle/data:/u01/app/oracle \
 	izone/oracle:11g
-
+```
 ### Run with customization of processes, sessions, transactions
 #### This customization is needed on the database initialization stage. If you are using mounted folder with DB files this is not used:
-
-    ##Consider this formula before customizing:
-    #processes=x
-    #sessions=x*1.1+5
-    #transactions=sessions*1.1
-    docker run -d -p 8080:8080 -p 1521:1521 -v /my/oracle/data:/u01/app/oracle\
-    -e processes=1000 \
-    -e sessions=1105 \
-    -e transactions=1215 \
-    izone/oracle:11g
-
+```
+##Consider this formula before customizing:
+#processes=x
+#sessions=x*1.1+5
+#transactions=sessions*1.1
+docker run --name OracleXE -h oraclexe\
+	-p 8080:8080 \
+	-p 1521:1521 \
+	-v /my/oracle/data:/u01/app/oracle\
+	-e processes=1000 \
+	-e sessions=1105 \
+	-e transactions=1215 \
+	-d izone/oracle:11g
+```
 ### Connect database with following setting:
-
-    hostname: localhost
-    port: 1521
-    sid: xe
-    username: system
-    password: oracle
-
+```
+hostname: localhost
+port: 1521
+sid: xe
+username: system
+password: oracle
+```
 ### Password for SYS & SYSTEM:
-
-    oracle
-
+```
+oracle
+```
 ### Connect to Oracle Application Express web management console with following settings:
-
-    http://localhost:8080/apex
-    workspace: INTERNAL
-    user: ADMIN
-    password: oracle
-
+```
+http://localhost:8080/apex
+workspace: INTERNAL
+user: ADMIN
+password: oracle
+```
 ### Apex upgrade up to v 5.*
-
+```
 docker run --rm --name OracleXE -h oraclexe \
 	--volumes-from ${DB_CONTAINER_NAME} \
 	--link ${DB_CONTAINER_NAME}:oracle-database \
 	-e PASS=YourSYSPASS \
 	-ti sath89/apex install
-
+```
 **CHANGELOG**
 * Fixed issue with reusable mounted data
 * Fixed issue with ownership of mounted data folders
