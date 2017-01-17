@@ -34,3 +34,11 @@ chmod +x $HOME/Desktop/oracle.desktop
 ```
 select banner from v$version;
 ```
+##### Save image
+```
+docker save izone/oracle:12.1.0.2-ee > img-oracle12c.tar
+```
+##### Load saved image
+```
+docker load < img-oracle12c.tar
+```
