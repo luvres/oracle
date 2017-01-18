@@ -9,7 +9,6 @@ docker pull izone/oracle:12c
 #### Run image
 ```
 docker run --name Oracle -h enterprise -p 1521:1521 -d izone/oracle:12c
-
 docker logs -f Oracle
 ```
 #### Set password
