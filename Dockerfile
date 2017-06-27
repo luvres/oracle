@@ -1,4 +1,4 @@
-FROM debian:wheezy
+FROM debian:wheezy-slim
 
 MAINTAINER Maksym Bilenko <sath891@gmail.com>
 
