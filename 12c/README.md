@@ -2,15 +2,15 @@
 ##### Download binaries
 ```
 http://www.oracle.com/technetwork/database/enterprise-edition/downloads/index.html
-cp $HOME/Downloads/linuxamd64_12102_database_* .
+cp $HOME/Downloads/linuxamd64_12201_database* .
 ```
 #### Build image
 ```
-./buildDockerImage.sh -v 12.1.0.2 -e
+./buildDockerImage.sh -v 12.2.0.1 -e
 ```
 ##### Run image
 ```
-docker run --name Oracle -p 1521:1521 -d izone/oracle:12.1.0.2-ee
+docker run --name Oracle -p 1521:1521 -d izone/oracle:12.2.0.1-ee
 docker logs -f Oracle
 ```
 ##### Set password
@@ -36,7 +36,7 @@ select banner from v$version;
 ```
 ##### Save image
 ```
-docker save izone/oracle:12.1.0.2-ee > img-oracle12c.tar
+docker save izone/oracle:12.2.0.2-ee > img-oracle12c.tar
 ```
 ##### Load saved image
 ```
