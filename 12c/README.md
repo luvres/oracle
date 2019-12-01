@@ -17,6 +17,12 @@ docker logs -f Oracle
 ```
 docker exec Oracle ./setPassword.sh oracle
 ```
+#### Access database
+```
+docker exec -ti Oracle sqlplus sys/oracle@ORCLCDB as sysdba
+
+docker exec -ti Oracle sqlplus system/oracle@ORCL
+```
 ##### Link to Oracle 12c in Desktop
 ```
 tee $HOME/Desktop/oracle.desktop <<EOF
