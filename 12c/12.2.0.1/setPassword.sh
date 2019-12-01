@@ -1,5 +1,5 @@
 #!/bin/bash
-# LICENSE CDDL 1.0 + GPL 2.0
+# LICENSE UPL 1.0
 #
 # Copyright (c) 1982-2016 Oracle and/or its affiliates. All rights reserved.
 # 
@@ -21,4 +21,6 @@ sqlplus / as sysdba << EOF
       ALTER USER SYSTEM IDENTIFIED BY "$ORACLE_PWD";
       ALTER SESSION SET CONTAINER=$ORACLE_PDB;
       ALTER USER PDBADMIN IDENTIFIED BY "$ORACLE_PWD";
+      exit;
 EOF
+

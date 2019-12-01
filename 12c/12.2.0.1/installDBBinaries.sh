@@ -1,5 +1,5 @@
 #!/bin/bash
-# LICENSE CDDL 1.0 + GPL 2.0
+# LICENSE UPL 1.0
 #
 # Copyright (c) 1982-2016 Oracle and/or its affiliates. All rights reserved.
 #
@@ -10,7 +10,8 @@
 # DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
 # 
 
-EDITION=$1
+# Convert $1 into upper case via "^^" (bash version 4 onwards)
+EDITION=${1^^}
 
 # Check whether edition has been passed on
 if [ "$EDITION" == "" ]; then
@@ -45,19 +46,39 @@ fi;
 # ---------------------
 sed -i -e "s|###ORACLE_EDITION###|$EDITION|g" $INSTALL_DIR/$INSTALL_RSP && \
 sed -i -e "s|###ORACLE_BASE###|$ORACLE_BASE|g" $INSTALL_DIR/$INSTALL_RSP && \
-sed -i -e "s|###ORACLE_HOME###|$ORACLE_HOME|g" $INSTALL_DIR/$INSTALL_RSP && \
+sed -i -e "s|###ORACLE_HOME###|$ORACLE_HOME|g" $INSTALL_DIR/$INSTALL_RSP
+
+# Install Oracle binaries
 cd $INSTALL_DIR       && \
 unzip $INSTALL_FILE_1 && \
 rm $INSTALL_FILE_1    && \
-unzip $INSTALL_FILE_2 && \
-rm $INSTALL_FILE_2    && \
 $INSTALL_DIR/database/runInstaller -silent -force -waitforcompletion -responsefile $INSTALL_DIR/$INSTALL_RSP -ignoresysprereqs -ignoreprereq && \
-rm -rf $INSTALL_DIR/database && \
-ln -s $ORACLE_BASE/$PWD_FILE $HOME/ && \
-echo "DEDICATED_THROUGH_BROKER_LISTENER=ON"  >> $ORACLE_HOME/network/admin/listener.ora && \
-echo "DIAG_ADR_ENABLED = off"  >> $ORACLE_HOME/network/admin/listener.ora;
+cd $HOME
 
-# Check whether Perl is working
-chmod ug+x $INSTALL_DIR/installPerl.sh && \
-$ORACLE_HOME/perl/bin/perl -v || \
-$INSTALL_DIR/installPerl.sh
+# Remove not needed components
+# APEX
+rm -rf $ORACLE_HOME/apex && \
+# ORDS
+rm -rf $ORACLE_HOME/ords && \
+# SQL Developer
+rm -rf $ORACLE_HOME/sqldeveloper && \
+# UCP connection pool
+rm -rf $ORACLE_HOME/ucp && \
+# All installer files
+rm -rf $ORACLE_HOME/lib/*.zip && \
+# OUI backup
+rm -rf $ORACLE_HOME/inventory/backup/* && \
+# Network tools help
+rm -rf $ORACLE_HOME/network/tools/help && \
+# Database upgrade assistant
+rm -rf $ORACLE_HOME/assistants/dbua && \
+# Database migration assistant
+rm -rf $ORACLE_HOME/dmu && \
+# Remove pilot workflow installer
+rm -rf $ORACLE_HOME/install/pilot && \
+# Support tools
+rm -rf $ORACLE_HOME/suptools && \
+# Temp location
+rm -rf /tmp/* && \
+# Database files directory
+rm -rf $INSTALL_DIR/database

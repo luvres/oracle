@@ -1,5 +1,5 @@
 #!/bin/bash
-# LICENSE CDDL 1.0 + GPL 2.0
+# LICENSE UPL 1.0
 #
 # Copyright (c) 1982-2016 Oracle and/or its affiliates. All rights reserved.
 # 
@@ -10,11 +10,6 @@
 # DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
 # 
 
-##### Root Password
-rootPass(){
-  echo "root:$RPASS" | chpasswd
-};rootPass
-
 ########### Move DB files ############
 function moveFiles {
 
@@ -24,6 +19,8 @@ function moveFiles {
 
    mv $ORACLE_HOME/dbs/spfile$ORACLE_SID.ora $ORACLE_BASE/oradata/dbconfig/$ORACLE_SID/
    mv $ORACLE_HOME/dbs/orapw$ORACLE_SID $ORACLE_BASE/oradata/dbconfig/$ORACLE_SID/
+   mv $ORACLE_HOME/network/admin/sqlnet.ora $ORACLE_BASE/oradata/dbconfig/$ORACLE_SID/
+   mv $ORACLE_HOME/network/admin/listener.ora $ORACLE_BASE/oradata/dbconfig/$ORACLE_SID/
    mv $ORACLE_HOME/network/admin/tnsnames.ora $ORACLE_BASE/oradata/dbconfig/$ORACLE_SID/
 
    # oracle user does not have permissions in /etc, hence cp and not mv
@@ -43,6 +40,14 @@ function symLinkFiles {
       ln -s $ORACLE_BASE/oradata/dbconfig/$ORACLE_SID/orapw$ORACLE_SID $ORACLE_HOME/dbs/orapw$ORACLE_SID
    fi;
    
+   if [ ! -L $ORACLE_HOME/network/admin/sqlnet.ora ]; then
+      ln -s $ORACLE_BASE/oradata/dbconfig/$ORACLE_SID/sqlnet.ora $ORACLE_HOME/network/admin/sqlnet.ora
+   fi;
+
+   if [ ! -L $ORACLE_HOME/network/admin/listener.ora ]; then
+      ln -s $ORACLE_BASE/oradata/dbconfig/$ORACLE_SID/listener.ora $ORACLE_HOME/network/admin/listener.ora
+   fi;
+
    if [ ! -L $ORACLE_HOME/network/admin/tnsnames.ora ]; then
       ln -s $ORACLE_BASE/oradata/dbconfig/$ORACLE_SID/tnsnames.ora $ORACLE_HOME/network/admin/tnsnames.ora
    fi;
@@ -58,6 +63,7 @@ function _int() {
    echo "SIGINT received, shutting down database!"
    sqlplus / as sysdba <<EOF
    shutdown immediate;
+   exit;
 EOF
    lsnrctl stop
 }
@@ -68,6 +74,7 @@ function _term() {
    echo "SIGTERM received, shutting down database!"
    sqlplus / as sysdba <<EOF
    shutdown immediate;
+   exit;
 EOF
    lsnrctl stop
 }
@@ -77,6 +84,7 @@ function _kill() {
    echo "SIGKILL received, shutting down database!"
    sqlplus / as sysdba <<EOF
    shutdown abort;
+   exit;
 EOF
    lsnrctl stop
 }
@@ -99,6 +107,13 @@ if [ `cat /sys/fs/cgroup/memory/memory.limit_in_bytes | wc -c` -lt 11 ]; then
    fi;
 fi;
 
+# Check that hostname doesn't container any "_"
+# Github issue #711
+if hostname | grep -q "_"; then
+   echo "Error: The hostname must not container any '_'".
+   echo "Your current hostname is '$(hostname)'"
+fi;
+
 # Set SIGINT handler
 trap _int SIGINT
 
@@ -110,15 +125,19 @@ trap _kill SIGKILL
 
 # Default for ORACLE SID
 if [ "$ORACLE_SID" == "" ]; then
-   export ORACLE_SID=ORCL
+   export ORACLE_SID=ORCLCDB
 else
+  # Make ORACLE_SID upper case
+  # Github issue # 984
+  export ORACLE_SID=${ORACLE_SID^^}
+
   # Check whether SID is no longer than 12 bytes
   # Github issue #246: Cannot start OracleDB image
   if [ "${#ORACLE_SID}" -gt 12 ]; then
      echo "Error: The ORACLE_SID must only be up to 12 characters long."
      exit 1;
   fi;
-  
+
   # Check whether SID is alphanumeric
   # Github issue #246: Cannot start OracleDB image
   if [[ "$ORACLE_SID" =~ [^a-zA-Z0-9] ]]; then
@@ -128,9 +147,14 @@ else
 fi;
 
 # Default for ORACLE PDB
-if [ "$ORACLE_PDB" == "" ]; then
-   export ORACLE_PDB=ORCL
-fi;
+export ORACLE_PDB=${ORACLE_PDB:-ORCLPDB1}
+
+# Make ORACLE_PDB upper case
+# Github issue # 984
+export ORACLE_PDB=${ORACLE_PDB^^}
+
+# Default for ORACLE CHARACTERSET
+export ORACLE_CHARACTERSET=${ORACLE_CHARACTERSET:-AL32UTF8}
 
 # Check whether database already exists
 if [ -d $ORACLE_BASE/oradata/$ORACLE_SID ]; then
@@ -145,22 +169,44 @@ if [ -d $ORACLE_BASE/oradata/$ORACLE_SID ]; then
    $ORACLE_BASE/$START_FILE;
    
 else
-   # Remove database config files, if they exist
-   rm -f $ORACLE_HOME/dbs/spfile$ORACLE_SID.ora
-   rm -f $ORACLE_HOME/dbs/orapw$ORACLE_SID
-   rm -f $ORACLE_HOME/network/admin/tnsnames.ora
+  # Remove database config files, if they exist
+  rm -f $ORACLE_HOME/dbs/spfile$ORACLE_SID.ora
+  rm -f $ORACLE_HOME/dbs/orapw$ORACLE_SID
+  rm -f $ORACLE_HOME/network/admin/sqlnet.ora
+  rm -f $ORACLE_HOME/network/admin/listener.ora
+  rm -f $ORACLE_HOME/network/admin/tnsnames.ora
    
-   # Create database
-   $ORACLE_BASE/$CREATE_DB_FILE $ORACLE_SID $ORACLE_PDB;
+  # Create database
+  $ORACLE_BASE/$CREATE_DB_FILE $ORACLE_SID $ORACLE_PDB $ORACLE_PWD;
    
-   # Move database operational files to oradata
-   moveFiles;
+  # Move database operational files to oradata
+  moveFiles;
+   
+  # Execute custom provided setup scripts
+  $ORACLE_BASE/$USER_SCRIPTS_FILE $ORACLE_BASE/scripts/setup
 fi;
 
-echo "#########################"
-echo "DATABASE IS READY TO USE!"
-echo "#########################"
+# Check whether database is up and running
+$ORACLE_BASE/$CHECK_DB_FILE
+if [ $? -eq 0 ]; then
+  echo "#########################"
+  echo "DATABASE IS READY TO USE!"
+  echo "#########################"
+  
+  # Execute custom provided startup scripts
+  $ORACLE_BASE/$USER_SCRIPTS_FILE $ORACLE_BASE/scripts/startup
+  
+else
+  echo "#####################################"
+  echo "########### E R R O R ###############"
+  echo "DATABASE SETUP WAS NOT SUCCESSFUL!"
+  echo "Please check output for further info!"
+  echo "########### E R R O R ###############" 
+  echo "#####################################"
+fi;
 
+# Tail on alert log and wait (otherwise container will exit)
+echo "The following output is now a tail of the alert.log:"
 tail -f $ORACLE_BASE/diag/rdbms/*/*/trace/alert*.log &
 childPID=$!
 wait $childPID

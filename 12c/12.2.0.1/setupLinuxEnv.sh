@@ -1,5 +1,5 @@
 #!/bin/bash
-# LICENSE CDDL 1.0 + GPL 2.0
+# LICENSE UPL 1.0
 #
 # Copyright (c) 1982-2016 Oracle and/or its affiliates. All rights reserved.
 #
@@ -13,15 +13,14 @@
 # Setup filesystem and oracle user
 # Adjust file permissions, go to /opt/oracle as user 'oracle' to proceed with Oracle installation
 # ------------------------------------------------------------
-mkdir -p $ORACLE_BASE/oradata && \
-chmod ug+x $ORACLE_BASE/$PWD_FILE && \
-chmod ug+x $ORACLE_BASE/$RUN_FILE && \
-chmod ug+x $ORACLE_BASE/$START_FILE && \
-chmod ug+x $ORACLE_BASE/$CREATE_DB_FILE && \
-groupadd -g 500 dba && \
-groupadd -g 501 oinstall && \
-useradd  -u 500 -d /home/oracle -g dba -G dba,oinstall -m -s /bin/bash oracle && \
+mkdir -p $ORACLE_BASE/scripts/setup && \
+mkdir $ORACLE_BASE/scripts/startup && \
+ln -s $ORACLE_BASE/scripts /docker-entrypoint-initdb.d && \
+mkdir $ORACLE_BASE/oradata && \
+mkdir -p $ORACLE_HOME && \
+chmod ug+x $ORACLE_BASE/*.sh && \
+yum -y install oracle-database-server-12cR2-preinstall openssl && \
+rm -rf /var/cache/yum && \
+ln -s $ORACLE_BASE/$PWD_FILE /home/oracle/ && \
 echo oracle:oracle | chpasswd && \
-yum -y install oracle-rdbms-server-12cR1-preinstall unzip wget tar openssl && \
-yum clean all && \
 chown -R oracle:dba $ORACLE_BASE
