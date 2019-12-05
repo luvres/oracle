@@ -11,6 +11,16 @@ cp $HOME/Downloads/LINUX.X64_180000_db_home* .
 ##### Run image
 ```
 docker run --name Oracle -p 1521:1521 -d izone/oracle:18.3.0-ee
+
+docker logs -f Oracle
+```
+##### Run image always
+```
+docker run --name Oracle \
+--restart=always \
+--publish=1521:1521 \
+-d izone/oracle:18.3.0-ee
+
 docker logs -f Oracle
 ```
 ##### Set password
