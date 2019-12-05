@@ -2,6 +2,37 @@
 ### Oracle 12c Enterprise Edition
 ### Oracle 11g Express Edition
 -----
+### Oracle 18c Enterprise Edition on Oraclelinux
+
+##### Run image
+```
+docker run --name Oracle -p 1521:1521 -d izone/oracle:18.3.0-ee
+
+docker logs -f Oracle
+```
+##### Run image always
+```
+docker run --name Oracle \
+--restart=always \
+--publish=1521:1521 \
+-d izone/oracle:18.3.0-ee
+
+docker logs -f Oracle
+```
+##### Set password
+```
+docker exec Oracle ./setPassword.sh oracle
+```
+#### Access database
+```
+docker exec -ti Oracle sqlplus sys/oracle@ORCLCDB as sysdba
+```
+##### Check version
+```
+select banner from v$version;
+```
+
+-----
 ### Oracle 12c Enterprise Edition on Oraclelinux
 #### Installation
 ```
@@ -26,6 +57,7 @@ docker exec -ti Oracle sqlplus system/oracle@ORCL
 ```
 https://github.com/luvres/oracle12c
 ```
+
 -----
 ### Oracle Express Edition 11g Release 2 on Debian Wheezy
 
